@@ -23,6 +23,7 @@
     bottom: 0;
 
     box-shadow: 0 -1px 1px rgb(100, 100, 100, 0.2);
+    z-index: 10;
   }
 
 </style>
