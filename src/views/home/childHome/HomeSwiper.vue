@@ -3,7 +3,7 @@
     <swiper>
       <swiper-item v-for="item in banners">
         <a :href="item.link">
-          <img :src="item.image" alt="">
+          <img :src="item.image" alt="" @load="imageLoad">
         </a>
       </swiper-item>
     </swiper>
@@ -19,6 +19,11 @@
 
 
   export default {
+    data() {
+      return {
+        isLoad: false
+      }
+    },
     props: {
       banners: {
         type: Array,
@@ -30,6 +35,15 @@
     components: {
       Swiper,
       SwiperItem
+    },
+    methods: {
+      // isLoad 轮播图有四张图片，只要加载完一张发送一次就可以了，不必多次发送
+      imageLoad() {
+        if (!this.isLoad) {
+          this.$emit('imageLoad')
+          this.isLoad = true
+        }
+      }
     },
   }
 

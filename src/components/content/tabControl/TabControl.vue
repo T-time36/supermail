@@ -38,6 +38,7 @@
     font-size: 15px;
     height: 40px;
     line-height: 40px;
+    background: #fff;
   }
 
   .tab-control-item {

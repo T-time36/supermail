@@ -1,6 +1,38 @@
 <template>
   <div class="good-list">
     <good-list-item v-for="item in goods" :goodItem="item" />
+    <ul>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+      <li>tt</li>
+    </ul>
   </div>
 </template>
 

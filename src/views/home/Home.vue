@@ -3,47 +3,17 @@
     <nav-bar class="home-nav">
       <div slot="center">购物街</div>
     </nav-bar>
-    <scroll class="content">
-      <home-swiper :banners="banners"></home-swiper>
+    <tab-control :titles="['流行', '新款', '精选']" @tabclick="tabclick" ref="tabControl1" class="tabControl" v-show="isFixed">
+    </tab-control>
+    <scroll class="content" ref="scroll" :probe-type="3" :pull-up-load="true" @scroll="currentScroll" @pullingUp="loadMore">
+      <home-swiper :banners="banners" @imageLoad="swiperImageLoad"></home-swiper>
       <recommend-view :recommends="recommends"></recommend-view>
       <feature-view />
-      <tab-control :titles="['流行', '新款', '精选']" class="tab-control" @tabclick=""></tab-control>
+      <tab-control :titles="['流行', '新款', '精选']" @tabclick="tabclick" ref="tabControl2">
+      </tab-control>
       <good-list :goods="showGoods" />
-
-      <ul>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-        <li></li>
-      </ul>
-
     </scroll>
+    <back-top @click.native="backClick" v-show="isShow" />
   </div>
 </template>
 
@@ -61,6 +31,11 @@
   import NavBar from 'components/common/navbar/NavBar.vue'
   // 商品列表
   import GoodList from 'components/content/goods/GoodList.vue'
+  // 滚动插件
+  import Scroll from 'components/common/scroll/Scroll.vue'
+  // 回到顶部按键
+  import BackTop from 'components/content/backTop/BackTop.vue';
+
 
   // 网络请求方法
   import {
@@ -68,8 +43,10 @@
     getHomeGoods
   } from 'network/home.js'
 
-  // 滚动插件
-  import Scroll from 'components/common/scroll/Scroll.vue';
+  // 防抖动函数
+  import {
+    debounce
+  } from 'common/utils.js'
 
   export default {
     name: 'Home',
@@ -81,7 +58,8 @@
       TabControl,
       NavBar,
       GoodList,
-      Scroll
+      Scroll,
+      BackTop,
     },
     data() {
       return {
@@ -105,7 +83,11 @@
             list: []
           }
         },
-        currentType: 'pop'
+        currentType: 'pop',
+        isShow: false,
+        isFixed: false,
+        tabOffsetTop: 0,
+        scrollY: 0
       }
     },
     computed: {
@@ -122,7 +104,20 @@
       // this.getHomeGoods('pop')
       // this.getHomeGoods('new')
       // this.getHomeGoods('sell')
-
+    },
+    mounted() {
+      // 接收商品图片加载完成的信息
+      const refresh = debounce(this.$refs.scroll.refresh, 200)
+      this.$bus.$on('itemImageLoad', () => {
+        refresh()
+      })
+    },
+    activated() {
+      this.$refs.scroll.scrollTo(0, this.scrollY, 1)
+      this.$refs.scroll.refresh()
+    },
+    deactivated() {
+      this.scrollY = this.$refs.scroll.scroll.y
     },
     methods: {
       // 事件监听相关的方法
@@ -138,6 +133,25 @@
             this.currentType = 'sell'
             break
         }
+        this.$refs.tabControl1.currentIndex = index
+        this.$refs.tabControl2.currentIndex = index
+      },
+      backClick() {
+        this.$refs.scroll.scrollTo(0, 0, 500)
+      },
+      currentScroll(position) {
+        // 当滚动超过一定距离，回到顶部显示出来
+        this.isShow = -position.y > 300
+
+        // 显示tabControl
+        this.isFixed = -position.y > this.tabOffsetTop
+      },
+      loadMore() {
+        // console.log('上拉加载更多')
+        // this.getHomeGoods(this.currentType)
+      },
+      swiperImageLoad() {
+        this.tabOffsetTop = this.$refs.tabControl2.$el.offsetTop
       },
 
       // 发送请求的方法
@@ -153,6 +167,8 @@
           this.goods[type].list.push(...res.data.list)
           this.goods[type].page += 1
         })
+        // 再次拉取，可以再次调用拉取事件
+        this.$refs.scroll.finishPullUp
       }
 
     },
@@ -162,7 +178,6 @@
 
 <style scoped>
   #home {
-    padding-top: 44px;
     /* 与视图同样高度 */
     height: 100vh;
     position: relative;
@@ -171,18 +186,6 @@
   .home-nav {
     background-color: var(--color-tint);
     color: #fff;
-
-    position: fixed;
-    left: 0;
-    right: 0;
-    top: 0;
-    z-index: 9;
-  }
-
-  .tab-control {
-    position: sticky;
-    top: 44px;
-    z-index: 9;
   }
 
   .content {
@@ -193,6 +196,11 @@
     bottom: 49px;
     right: 0;
     left: 0;
+  }
+
+  .tabControl {
+    position: relative;
+    z-index: 9;
   }
 
 </style>
